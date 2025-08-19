@@ -6,6 +6,8 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.model.InsertOneModel;
+import com.mongodb.client.model.WriteModel;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public class MongoDB {
 			.getDatabase(DATABASE)
 			.getCollection(COLLECTION)
 			.withTimeout(60, TimeUnit.SECONDS)
-			.insertMany(documents);
+			.bulkWrite(documents.stream().map(doc -> new InsertOneModel<>(doc)).toList());
 	}
 
 	private MongoClient getClient() {
