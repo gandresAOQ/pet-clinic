@@ -59,7 +59,8 @@ public class MongoDB {
 			String hashCodeOfData = this.sha256hex(new ObjectMapper().writeValueAsString(data));
 			System.out.println("HashCode: " + hashCodeOfData);
 			document.append("_id", hashCodeOfData);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
 		data.forEach((key, value) -> document.append(key, value));
@@ -89,9 +90,7 @@ public class MongoDB {
 	}
 
 	private String sha256hex(String originalString) {
-		return Hashing.sha256()
-			.hashString(originalString, StandardCharsets.UTF_8)
-			.toString();
+		return Hashing.sha256().hashString(originalString, StandardCharsets.UTF_8).toString();
 	}
 
 }
