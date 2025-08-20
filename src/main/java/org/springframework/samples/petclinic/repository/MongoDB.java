@@ -57,6 +57,7 @@ public class MongoDB {
 
 		try {
 			String hashCodeOfData = this.sha256hex(new ObjectMapper().writeValueAsString(data));
+			System.out.println("HashCode: " + hashCodeOfData);
 			document.append("_id", hashCodeOfData);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
