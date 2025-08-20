@@ -54,15 +54,6 @@ public class MongoDB {
 		document.append(metric, metricValue);
 		document.append("application", System.getenv("APPLICATION"));
 		document.append("platform", System.getenv("PLATFORM"));
-
-		try {
-			String hashCodeOfData = this.sha256hex(new ObjectMapper().writeValueAsString(data));
-			System.out.println("HashCode: " + hashCodeOfData);
-			document.append("_id", hashCodeOfData);
-		}
-		catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
 		data.forEach((key, value) -> document.append(key, value));
 
 		this.documents.add(document);
@@ -73,11 +64,7 @@ public class MongoDB {
 
 	public void storeDocuments() {
 		System.out.printf("Total elements in document array: %d", documents.size());
-		this.getClient()
-			.getDatabase(DATABASE)
-			.getCollection(COLLECTION)
-			.withTimeout(60, TimeUnit.SECONDS)
-			.bulkWrite(documents.stream().map(doc -> new InsertOneModel<>(doc)).toList());
+		this.getClient().getDatabase(DATABASE).getCollection(COLLECTION).insertMany(documents);
 	}
 
 	private MongoClient getClient() {

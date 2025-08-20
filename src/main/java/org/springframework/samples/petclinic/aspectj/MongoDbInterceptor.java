@@ -1,7 +1,6 @@
 package org.springframework.samples.petclinic.aspectj;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.annotation.PreDestroy;
 import org.springframework.samples.petclinic.repository.MongoDB;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -9,9 +8,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class MongoDbInterceptor implements HandlerInterceptor {
 
-	@Override
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, java.lang.Object handler,
-			java.lang.Exception ex) throws Exception {
+	@PreDestroy
+	public void shutdown() {
 		MongoDB.getMongoDB().storeDocuments();
 	}
 
