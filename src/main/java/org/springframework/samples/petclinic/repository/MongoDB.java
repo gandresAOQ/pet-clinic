@@ -1,5 +1,8 @@
 package org.springframework.samples.petclinic.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.hash.Hashing;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.ServerApi;
@@ -10,6 +13,7 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 import org.bson.Document;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +54,13 @@ public class MongoDB {
 		document.append(metric, metricValue);
 		document.append("application", System.getenv("APPLICATION"));
 		document.append("platform", System.getenv("PLATFORM"));
+
+		try {
+			String hashCodeOfData = this.sha256hex(new ObjectMapper().writeValueAsString(data));
+			document.append("_id", hashCodeOfData);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 		data.forEach((key, value) -> document.append(key, value));
 
 		this.documents.add(document);
@@ -74,6 +85,12 @@ public class MongoDB {
 			this.mongoClient.getDatabase(DATABASE).getCollection(COLLECTION);
 		}
 		return this.mongoClient;
+	}
+
+	private String sha256hex(String originalString) {
+		return Hashing.sha256()
+			.hashString(originalString, StandardCharsets.UTF_8)
+			.toString();
 	}
 
 }
