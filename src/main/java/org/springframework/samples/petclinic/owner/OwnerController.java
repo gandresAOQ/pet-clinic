@@ -50,8 +50,11 @@ class OwnerController {
 
 	private final OwnerRepository owners;
 
-	public OwnerController(OwnerRepository owners) {
+	private final CachedOwnerRepository cachedOwnerRepository;
+
+	public OwnerController(OwnerRepository owners, CachedOwnerRepository cachedOwnerRepository) {
 		this.owners = owners;
+		this.cachedOwnerRepository = cachedOwnerRepository;
 	}
 
 	@InitBinder
@@ -62,7 +65,7 @@ class OwnerController {
 	@ModelAttribute("owner")
 	public Owner findOwner(@PathVariable(name = "ownerId", required = false) Integer ownerId) {
 		return ownerId == null ? new Owner()
-				: this.owners.findById(ownerId)
+				: cachedOwnerRepository.findById(ownerId)
 					.orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
 							+ ". Please ensure the ID is correct " + "and the owner exists in the database."));
 	}
@@ -126,7 +129,7 @@ class OwnerController {
 
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
-		List<Owner> allOwners = owners.findAllOwners(); // Fetch all owners
+		List<Owner> allOwners = cachedOwnerRepository.findAllOwners(); // Fetch all owners
 		List<Owner> filteredOwners = allOwners.stream()
 			.filter(owner -> owner.getLastName().startsWith(lastname)) // Filter in memory
 			.toList();
@@ -169,7 +172,7 @@ class OwnerController {
 	@GetMapping("/owners/{ownerId}")
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
-		List<Owner> allOwners = owners.findAllOwners(); // Fetch all owners
+		List<Owner> allOwners = cachedOwnerRepository.findAllOwners(); // Fetch all owners
 		Owner owner = allOwners.stream()
 			.filter(o -> o.getId() == ownerId) // Filter in memory
 			.findFirst()
