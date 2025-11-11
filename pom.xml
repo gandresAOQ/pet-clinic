@@ -308,6 +308,14 @@
         <artifactId>cyclonedx-maven-plugin</artifactId>
       </plugin>
 
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <jvmArguments>-XX:+UseG1GC</jvmArguments>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
   <licenses>

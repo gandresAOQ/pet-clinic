@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -126,8 +126,14 @@ class OwnerController {
 
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		return owners.findByLastNameStartingWith(lastname, pageable);
+		List<Owner> allOwners = owners.findAllOwners(); // Fetch all owners
+		List<Owner> filteredOwners = allOwners.stream()
+			.filter(owner -> owner.getLastName().startsWith(lastname)) // Filter in memory
+			.toList();
+		int start = Math.min((page - 1) * pageSize, filteredOwners.size());
+		int end = Math.min(start + pageSize, filteredOwners.size());
+		return new PageImpl<>(filteredOwners.subList(start, end), PageRequest.of(page - 1, pageSize),
+				filteredOwners.size());
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
@@ -163,9 +169,12 @@ class OwnerController {
 	@GetMapping("/owners/{ownerId}")
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
-		Optional<Owner> optionalOwner = this.owners.findById(ownerId);
-		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
-				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
+		List<Owner> allOwners = owners.findAllOwners(); // Fetch all owners
+		Owner owner = allOwners.stream()
+			.filter(o -> o.getId() == ownerId) // Filter in memory
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException(
+					"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
 		mav.addObject(owner);
 		return mav;
 	}
