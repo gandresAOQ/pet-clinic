@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -87,10 +86,10 @@ class ClinicServiceTests {
 
 	@Test
 	void shouldFindOwnersByLastName() {
-		List<Owner> owners = this.owners.findAllOwners();
+		Page<Owner> owners = this.owners.findByLastNameStartingWith("Davis", pageable);
 		assertThat(owners).hasSize(2);
 
-		owners = this.owners.findAllOwners();
+		owners = this.owners.findByLastNameStartingWith("Daviss", pageable);
 		assertThat(owners).isEmpty();
 	}
 
@@ -108,8 +107,8 @@ class ClinicServiceTests {
 	@Test
 	@Transactional
 	void shouldInsertOwner() {
-		List<Owner> owners = this.owners.findAllOwners();
-		int found = owners.size();
+		Page<Owner> owners = this.owners.findByLastNameStartingWith("Schultz", pageable);
+		int found = (int) owners.getTotalElements();
 
 		Owner owner = new Owner();
 		owner.setFirstName("Sam");
@@ -120,8 +119,8 @@ class ClinicServiceTests {
 		this.owners.save(owner);
 		assertThat(owner.getId()).isNotZero();
 
-		owners = this.owners.findAllOwners();
-		assertThat(owners.size()).isEqualTo(found + 1);
+		owners = this.owners.findByLastNameStartingWith("Schultz", pageable);
+		assertThat(owners.getTotalElements()).isEqualTo(found + 1);
 	}
 
 	@Test
